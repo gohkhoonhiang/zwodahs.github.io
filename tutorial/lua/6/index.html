@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Packaging lua functions</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <link rel="canonical" href="http://zwodahs.me/tutorial/lua/6/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" href="/">ZwodahS</a>
+    </div>
+</header>
+<nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+    <div class="wrapper">
+        <div class="trigger">
+        
+            <a class="page-link" href="/projects/games/">Games I made</a>
+        
+            <a class="page-link" href="/lessons/">Tutorials and Lessons</a>
+        
+            <a class="page-link" href="/life/">My Lifes</a>
+        
+            <a class="page-link" href="/about/">About</a>
+        
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Packaging lua functions</h1>
+  </header>
+
+  <article class="post-content">
+    <p>In part 2 of the tutorial, we have seen how we can call a Lua function from a C++ program.
+In this part of the tutorial, we will make use of that and put the functions in proper packages/modules.
+The main reason to do this is to make sure we don’t dirty the global namespaces, similar to why we use namespace in C++.</p>
+
+<p>First, let us look at the modification we do to the lua script.</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="k">if</span> <span class="n">functions</span> <span class="o">==</span> <span class="kc">nil</span> <span class="k">then</span> <span class="n">functions</span> <span class="o">=</span> <span class="p">{};</span> <span class="k">end</span>
+<span class="k">if</span> <span class="n">functions</span><span class="p">.</span><span class="n">computation</span> <span class="o">==</span> <span class="kc">nil</span> <span class="k">then</span> <span class="n">functions</span><span class="p">.</span><span class="n">computation</span> <span class="o">=</span> <span class="p">{};</span> <span class="k">end</span>
+
+<span class="c1">-- create a local reference to functions.computation.</span>
+<span class="kd">local</span> <span class="n">package</span> <span class="o">=</span> <span class="n">functions</span><span class="p">.</span><span class="n">computation</span><span class="p">;</span>
+
+<span class="c1">-- don&#39;t put any of these in the global namspace.</span>
+<span class="k">function</span> <span class="nc">package</span><span class="p">.</span><span class="nf">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span>
+<span class="k">end</span>
+<span class="k">function</span> <span class="nc">package</span><span class="p">.</span><span class="nf">multi_compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">z</span>
+<span class="k">end</span></code></pre></div>
+
+<p>The first two line creates the package “functions.computation” if it does not exist.
+The check is there to make sure we don’t override anything else that is defined in other lua files.</p>
+
+<p>The next part creates a local variable <em>package</em> that references <em>functions.computation</em>.</p>
+
+<p>To make the <em>compute</em> function and the <em>multicompute</em> function part of the computation, we just need to append <em>package.</em> before the function.
+The <em>functions</em> table will still be stored in the global namespace.</p>
+
+<p>The next part is to see how we can get it from the C++ program.</p>
+
+<p>The loading of the file is the same.
+We will just look at the snippet that call the compute function.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;functions&quot;</span><span class="p">);</span>                                  <span class="c1">// get the functions tables that we defined</span>
+<span class="n">lua_getfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;computation&quot;</span><span class="p">);</span>                             <span class="c1">// get the inner table, we can nest it any how we want</span>
+<span class="n">lua_remove</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>                                              <span class="c1">// remove the &quot;functions&quot; table from the stack.</span>
+<span class="n">lua_getfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;compute&quot;</span><span class="p">);</span>                                 <span class="c1">// get the compute function from the computation table</span>
+<span class="n">lua_remove</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>                                              <span class="c1">// remove the &quot;computations&quot; table from the stack.</span>
+<span class="kt">int</span> <span class="n">type</span> <span class="o">=</span> <span class="n">lua_type</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>                                     <span class="c1">// get the type of the item that we just put on the stack</span>
+<span class="k">if</span><span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">LUA_TFUNCTION</span><span class="p">)</span>                                       <span class="c1">// check that it is a function</span>
+<span class="p">{</span>
+    <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>                                       <span class="c1">// x</span>
+    <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>                                       <span class="c1">// y</span>
+    <span class="n">lua_call</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                          <span class="c1">// call the function, 2 (argument count), 1 (number of return value)</span>
+    <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>                       <span class="c1">// get the return value from the stack.</span>
+    <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                              <span class="c1">// pop the value from the stack</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] Return value : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">sum</span><span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>    <span class="c1">// output the value</span>
+<span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] No such function !&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                              <span class="c1">// remove the item from the stack. We don&#39;t really know what it is.</span>
+<span class="p">}</span></code></pre></div>
+
+<p>To get the function, we can’t get it from the global namespace.
+Instead, we need to dig into the tables.
+The first part is getting the functions table from the global namespace. </p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;functions&quot;</span><span class="p">);</span></code></pre></div>
+
+<p>This is the same as how we get the original compute function from the previous tutorial.</p>
+
+<p>For each each table level, you need to get the field within the table, and remove the parent table afterward.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_getfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+<span class="n">lua_remove</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span></code></pre></div>
+
+<p>We will just need to keep getting the field until we get to the compute function.</p>
+
+<p>The full code for this tutorial can be found <a href="https://github.com/ZwodahS/lua-examples/tree/master/tutorial/6">here</a>. </p>
+
+<p><a href="/tutorial/lua/5">[« Accessing C++ objects from Lua]</a> <a href="/tutorial/lua">[Tutorial Index]</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+    
+
+    <footer class="motd-div">
+</footer>
+<footer class="site-footer">
+    <div class="wrapper">
+        <span class="last-updated-date">Last updated at 08 November 2014</span>
+    </div>
+</footer>
+
+
+  </body>
+
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Running Lua function from C++</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <link rel="canonical" href="http://zwodahs.me/tutorial/lua/2/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" href="/">ZwodahS</a>
+    </div>
+</header>
+<nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+    <div class="wrapper">
+        <div class="trigger">
+        
+            <a class="page-link" href="/projects/games/">Games I made</a>
+        
+            <a class="page-link" href="/lessons/">Tutorials and Lessons</a>
+        
+            <a class="page-link" href="/life/">My Lifes</a>
+        
+            <a class="page-link" href="/about/">About</a>
+        
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Running Lua function from C++</h1>
+  </header>
+
+  <article class="post-content">
+    <p>In this tutorial, we will cover how to run a Lua function with a C++ program.
+There are 2 parts to the tutorial.
+The first part will cover how to call the function.
+The second part will show a simple way to wrap your Lua function inside a C++ function.
+In additional, we will see how to return multiple values from Lua function and how to access it from C++.</p>
+
+<h3 id="part-1--running-a-lua-function-from-c">Part 1 : Running a Lua Function from C++</h3>
+<p>Let me begin by showing you the Lua function that we want to call.</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="k">function</span> <span class="nf">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span>
+<span class="k">end</span></code></pre></div>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span> <span class="o">=</span> <span class="n">setupLuaState</span><span class="p">();</span>
+
+    <span class="n">load</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;function.lua&quot;</span><span class="p">);</span>
+    <span class="c1">//////////////////// Single return value function -- &quot;compute&quot; ////////////////////////</span>
+    <span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;compute&quot;</span><span class="p">);</span>                                    <span class="c1">// get the function &quot;compute&quot; from the global namespace and put it on the stack</span>
+    <span class="kt">int</span> <span class="n">type</span> <span class="o">=</span> <span class="n">lua_type</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>                                     <span class="c1">// get the type of the item that we just put on the stack</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">LUA_TFUNCTION</span><span class="p">)</span>                                       <span class="c1">// check that it is a function</span>
+    <span class="p">{</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>                                       <span class="c1">// x</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>                                       <span class="c1">// y</span>
+        <span class="n">lua_call</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                          <span class="c1">// call the function, 2 (argument count), 1 (number of return value)</span>
+        <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>                       <span class="c1">// get the return value from the stack.</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                              <span class="c1">// pop the value from the stack</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] Return value : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">sum</span><span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>    <span class="c1">// output the value</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] No such function !&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>                                              <span class="c1">// remove the item from the stack. We don&#39;t really know what it is.</span>
+    <span class="p">}</span>
+    <span class="c1">/////////////////////////////////////////////////////////////////////////////////////</span>
+    <span class="n">cleanup</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Like the previous tutorial, we use the load method to load the script.
+All function declared inside the script will be loaded into the global namespace.
+We will discuss how to create modules/packages in the later tutorial.</p>
+
+<p>To communicate from C++ to lua, we need to visualize a stack.
+The stack can be access using positive index and negative index.
+For example, a stack with 4 items will look like this.</p>
+
+<pre><code>Top Item    : [ -1 ] [ 4 ]
+            : [ -2 ] [ 3 ] 
+            : [ -3 ] [ 2 ] 
+Bottom Item : [ -4 ] [ 1 ] 
+</code></pre>
+
+<p>When the Lua State is first created, there will be nothing on the stack.</p>
+
+<p>The first method we call in C++ is</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">variablename</span><span class="p">);</span></code></pre></div>
+
+<p>The lua_getglobal method gets an object from the global namespace and put it onto the stack.
+The object can be anything, string, integer, or in this case a function.</p>
+
+<p>To be safe, we check the type of the item by </p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_type</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></code></pre></div>
+
+<p>This function get type of the item at the specified index.
+In this case, -1 is the top item on the stack.</p>
+
+<p>We check the type of the item and make sure we have a function.
+If you want to know the list of types, you can look at the lua manual.
+Now that we have ensure that it is a function, we can call the function.</p>
+
+<p>To call the function, we need to visualize the stack again.</p>
+
+<p>We have a function that looks like this</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="n">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code></pre></div>
+
+<p>we will need to construct the stack such that it looks like</p>
+
+<pre><code>Top      : [ y ]         [ -1 ] [ 3 ]
+           [ x ]         [ -2 ] [ 2 ]
+Bottom   : [ compute ]   [ -3 ] [ 1 ] 
+</code></pre>
+
+<p>Since the compute function is already on the stack, we will only need to push the 2 integers in this order.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">//  x</span>
+<span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span> <span class="c1">//  y</span></code></pre></div>
+
+<p>Lua API provides push methods for different datatypes.
+In this case, we will push 2 numbers onto the stack.</p>
+
+<p>In order to call the compute function, we will use the following Lua API method. </p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_call</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">nargs</span><span class="p">,</span> <span class="n">nreturns</span><span class="p">);</span></code></pre></div>
+
+<p>This will call the function at the (-nargs + (-1)) position, providing the function with nargs arguments.
+In this case, the nargs is 2 and the compute function is at the -3 position.</p>
+
+<p>The number of return value in this case is 1, and the return value will be pushed onto the stack.
+When you call lua_call, the function along with arguments are popped from the stack.
+After function is called, the stack will look like this.</p>
+
+<pre><code>Top     : [Return value]   [-1]
+</code></pre>
+
+<p>To retrieve the value, we will need to take it from the stack as well.
+This can be done using </p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span></code></pre></div>
+
+<p>There are many check methods for different datatypes.
+All of them will throw an error if it value is not of that type.
+You can first check the type of the value by using lua_type first.
+You can find the full list of check method in the Lua manual.</p>
+
+<p>luaL_checkXXX will only peek at the value and not pop it so we have to do it manually.</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
+
+<p>lua_pop takes in an integer representing the number of things to pop, <em>not</em> the index.
+It is always a good practice to return the stack to the original state that you started with.</p>
+
+<h3 id="part-2--wrapper-and-multiple-return-value">Part 2 : Wrapper and Multiple return value</h3>
+
+<p>Lua function support multiple return values. To demostrate this, I have made a second lua function</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="k">function</span> <span class="nf">multi_compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">z</span>
+<span class="k">end</span></code></pre></div>
+
+<p>In this part of the example, I also created a wrapper for the function in C++.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">multi</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt">int</span> <span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ints</span><span class="p">;</span>
+    <span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;multi_compute&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">lua_type</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">LUA_TFUNCTION</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+        <span class="n">lua_call</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">yz</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">xz</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+        <span class="n">ints</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">xy</span><span class="p">);</span>
+        <span class="n">ints</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">yz</span><span class="p">);</span>
+        <span class="n">ints</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">xz</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">ints</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Most of them should look familiar to you.
+The important thing to take note here is the order which the return values are retrieved.
+The last thing left is to call this method.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span> <span class="o">=</span> <span class="n">setupLuaState</span><span class="p">();</span>
+    <span class="n">load</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;function.lua&quot;</span><span class="p">);</span>
+    <span class="c1">////////////////////// multiple return value function -- &quot;multi_compute&quot; //////////////</span>
+    <span class="k">auto</span> <span class="n">ints</span> <span class="o">=</span> <span class="n">multi</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">ints</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] X + Y : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] Y + Z : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">ints</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;[C++] X + Z : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">ints</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">cleanup</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>That is all that is needed to call a Lua function from C++. 
+The code for this part of the tutorial can be found <a href="https://github.com/ZwodahS/lua-examples/tree/master/tutorial/2">here</a>.
+Now to the next part, calling a C method from lua</p>
+
+<p><a href="/tutorial/lua/1">[« Setting up]</a> <a href="/tutorial/lua">[Tutorial Index]</a> <a href="/tutorial/lua/3">[Running a C++ function from Lua »]</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+    
+
+    <footer class="motd-div">
+</footer>
+<footer class="site-footer">
+    <div class="wrapper">
+        <span class="last-updated-date">Last updated at 08 November 2014</span>
+    </div>
+</footer>
+
+
+  </body>
+
+</html>

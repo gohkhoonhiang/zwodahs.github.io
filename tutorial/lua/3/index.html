@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Running C++ function from Lua</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <link rel="canonical" href="http://zwodahs.me/tutorial/lua/3/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" href="/">ZwodahS</a>
+    </div>
+</header>
+<nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+    <div class="wrapper">
+        <div class="trigger">
+        
+            <a class="page-link" href="/projects/games/">Games I made</a>
+        
+            <a class="page-link" href="/lessons/">Tutorials and Lessons</a>
+        
+            <a class="page-link" href="/life/">My Lifes</a>
+        
+            <a class="page-link" href="/about/">About</a>
+        
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Running C++ function from Lua</h1>
+  </header>
+
+  <article class="post-content">
+    <p>In this tutorial, I will cover how to run a C++ function from a Lua script.
+This is a pretty easy part so I am going to just show the code.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">extern</span> <span class="s">&quot;C&quot;</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="kt">int</span> <span class="n">compute</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">luaL_checkint</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span> <span class="o">=</span> <span class="n">setupLuaState</span><span class="p">();</span>
+
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">compute</span><span class="p">);</span>                                  <span class="c1">// push the c function to the stack</span>
+    <span class="n">lua_setglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;compute&quot;</span><span class="p">);</span>                                    <span class="c1">// add the function to the global</span>
+
+    <span class="n">load</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;run.lua&quot;</span><span class="p">);</span>
+
+    <span class="n">cleanup</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>And in the lua script </p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="n">x</span> <span class="o">=</span> <span class="n">compute</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">48</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></code></pre></div>
+
+<p>For a function to be usable by the Lua, they need to have the following method signature.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">static</span> <span class="kt">int</span> <span class="nf">compute</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">);</span></code></pre></div>
+
+<p>All the arguments will be pass through the stack, and all the return value(s) will be pass through the stack.</p>
+
+<p>Let us discuss about the method first.
+The compute method is the same as the compute method in the previous part.
+It takes in 2 argument, x and y, and return the value (x - y).</p>
+
+<p>When the compute method is called, the stack will look like this</p>
+
+<pre><code>Top Item    : [ y ] [ -1 ] [ 2 ]
+Bottom Item : [ x ] [ -2 ] [ 1 ] 
+</code></pre>
+
+<p>The first argument will be at position 1, and the second argument will be at position 2.
+Our code above mirrors it, and pop the x and y value at the respective position.</p>
+
+<p>The next step is to register the function to the Lua global namespace.
+To do that, the first step is to push the function onto the stack.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">compute</span><span class="p">);</span></code></pre></div>
+
+<p>The next step is to give it a name in the global namespace.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">lua_setglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;compute&quot;</span><span class="p">);</span></code></pre></div>
+
+<p>Set global will pop the function for us so we don’t have to pop anything.</p>
+
+<p>After we have done that, we will be able to call the function from lua like any function.</p>
+
+<p>This tutorial is short but important for the next part, calling a C++ object from Lua.</p>
+
+<p>The code for this part of the tutorial can be found <a href="https://github.com/ZwodahS/lua-examples/tree/master/tutorial/3">here</a></p>
+
+<p><a href="/tutorial/lua/2">[« Running a Lua function from C++]</a> <a href="/tutorial/lua">[Tutorial Index]</a> <a href="/tutorial/lua/5">[Accessing C++ objects from Lua »]</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+    
+
+    <footer class="motd-div">
+</footer>
+<footer class="site-footer">
+    <div class="wrapper">
+        <span class="last-updated-date">Last updated at 08 November 2014</span>
+    </div>
+</footer>
+
+
+  </body>
+
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Accessing C++ objects from lua</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <link rel="canonical" href="http://zwodahs.me/tutorial/lua/5/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" href="/">ZwodahS</a>
+    </div>
+</header>
+<nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+    <div class="wrapper">
+        <div class="trigger">
+        
+            <a class="page-link" href="/projects/games/">Games I made</a>
+        
+            <a class="page-link" href="/lessons/">Tutorials and Lessons</a>
+        
+            <a class="page-link" href="/life/">My Lifes</a>
+        
+            <a class="page-link" href="/about/">About</a>
+        
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Accessing C++ objects from lua</h1>
+  </header>
+
+  <article class="post-content">
+    <p>In this tutorial, I will cover one method that you can use to access C++ objects from Lua.</p>
+
+<p>To start, let me describe the scenario that we will be implementing.</p>
+
+<p>Assume that we are making a game and we want to calculate the damage that each unit takes in a fight.
+Each unit has a damage attribute and a health attribute.
+We will do the calculation in the Lua script but store the attributes inside the C++ objects.
+This is useful if you have various kinds of skill that a unit can use and the damage depends on the attribute of the unit.
+You can do this in just C++ but doing it in Lua allows you to write new skills without having to recompile the game.</p>
+
+<p>First, let us start with the Unit object.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Unit</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">Unit</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">damage</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="n">health</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="p">{</span>
+    <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">damage</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">health</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">dealtDamage</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">damage</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">health</span> <span class="o">-=</span> <span class="n">damage</span><span class="p">;</span>
+        <span class="n">health</span> <span class="o">=</span> <span class="n">health</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="n">health</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kt">int</span> <span class="nf">getDamage</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">damage</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<p>There is nothing we need change when writing the object we want to access from Lua.
+We will just write it normally.</p>
+
+<p>The function that calculate and deals the damage looks like this.</p>
+
+<div class="highlight"><pre><code class="language-lua" data-lang="lua"><span class="k">function</span> <span class="nf">applyDamage</span><span class="p">(</span><span class="n">attacker</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">damage</span> <span class="o">=</span> <span class="n">attacker</span><span class="p">:</span><span class="n">getDamage</span><span class="p">();</span>
+    <span class="n">target</span><span class="p">:</span><span class="n">dealtDamage</span><span class="p">(</span><span class="n">damage</span><span class="p">);</span>
+<span class="k">end</span></code></pre></div>
+
+<p>We will also write a wrapper for the function so we can use it easily.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">ApplyDamageFunction</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">ApplyDamageFunction</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">functionname</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">function</span><span class="p">(</span><span class="n">functionname</span><span class="p">)</span>
+    <span class="p">{</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">function</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">applyDamage</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="n">Unit</span><span class="o">&amp;</span> <span class="n">attacker</span><span class="p">,</span> <span class="n">Unit</span><span class="o">&amp;</span> <span class="n">defender</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">lua_getglobal</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+        <span class="kt">int</span> <span class="n">type</span> <span class="o">=</span> <span class="n">lua_type</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">LUA_TFUNCTION</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">putUnit</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">attacker</span><span class="p">);</span>
+            <span class="n">putUnit</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">defender</span><span class="p">);</span>
+            <span class="n">lua_call</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Cannot find &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">function</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;function&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<p>Ignore the “putUnit” function for now. 
+What it does is putting a unit object onto the stack.
+We will cover it in a short while.</p>
+
+<p>To access the C++ objects from Lua, you will need to make use of metatable and userdata type.
+Let me show the code for creating metatable in C++ first.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">loadWrapper</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/**</span>
+<span class="cm">     * This creates the meta table and put it on the stack and give it a name so you can use it later.</span>
+<span class="cm">     */</span>
+    <span class="n">luaL_newmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">);</span>
+    <span class="cm">/**</span>
+<span class="cm">     * This tells all object with this metatable to search itself for all the missing &quot;index&quot;</span>
+<span class="cm">     */</span>
+    <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;__index&quot;</span><span class="p">);</span>
+    <span class="cm">/**</span>
+<span class="cm">     * Each of the follow pairs push the cfunction onto the stack and add the function to the metatable.</span>
+<span class="cm">     * The metatable will still be on the stack after each of the call.</span>
+<span class="cm">     */</span>
+    <span class="c1">// set the getDamage method</span>
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function_unit_getDamage</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;getDamage&quot;</span><span class="p">);</span>
+    <span class="c1">// set the dealt damage method</span>
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function_unit_dealtDamage</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;dealtDamage&quot;</span><span class="p">);</span>
+    <span class="c1">// set the health method</span>
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function_unit_health</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;health&quot;</span><span class="p">);</span>
+    <span class="c1">// pop the meta table from the stack</span>
+    <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The first part creates the metatable.
+The second part tells all objects with this metatable to search itself for missing index. I will touch on this later.
+The last part align C functions to the various field in the metatable.
+This part just register the metatable to be used later.</p>
+
+<p>To put the C++ object onto the stack, we want to make use of userdata.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">putUnit</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="n">Unit</span><span class="o">&amp;</span> <span class="n">unit</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Unit</span><span class="o">**</span> <span class="n">userdata</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Unit</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">lua_newuserdata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Unit</span><span class="o">*</span><span class="p">)));</span>
+    <span class="o">*</span><span class="n">userdata</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">unit</span><span class="p">;</span>
+    <span class="n">luaL_setmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This creates a userdata that stores a pointer to a unit object(Unit*).
+The lua_newuserdata method will return the address to the pointer(Unit**).
+After we set the pointer to points to our unit object, we then set the metatable to the userdata.
+This allows the Lua script to know the method that is available to the userdata.</p>
+
+<p>Now we have the method to put the c++ object onto the Lua stack, we can start writing wrapper for the methods.
+Similar to the previous tutorial, all methods used by Lua must follow the same signature.
+I will use the getDamage method as an example to show how to do it.
+Check out the source code to see how the other method are done.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">static</span> <span class="kt">int</span> <span class="nf">function_unit_getDamage</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Unit</span><span class="o">**</span> <span class="n">unit</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Unit</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">luaL_testudata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">));</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">damage</span> <span class="o">=</span> <span class="p">(</span><span class="o">**</span><span class="n">unit</span><span class="p">).</span><span class="n">getDamage</span><span class="p">();</span>
+            <span class="n">lua_pushnumber</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">damage</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+            <span class="n">lua_pushnil</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span></code></pre></div>
+
+<p>When we call unit:getDamage() in the Lua script, it is similar to calling <em>unit.getDamage(unit)</em>.
+So in order to get the caller of the method, we will just need to take it from the first argument.
+You could use <em>unit.getDamage(unit)</em> instead of <em>unit:getDamage()</em> but that just weird.
+Also, when this is called, the userdata do not have the getDamage method.
+So, it will look for the method in the table defined in __index, in this case, the UnitMT table.</p>
+
+<p>In this case, I have use testudata instead of checkudata to get the object.
+The main difference is testudata do not throw error if it fails; instead it returns a nullptr. 
+We also make sure that the udata have a metatable of UnitMT.</p>
+
+<p>After we get the object, we just need to push the damage value back onto the stack.</p>
+
+<p>So to wrap things up, here is the main method.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span> <span class="o">=</span> <span class="n">setupLuaState</span><span class="p">();</span>
+
+    <span class="c1">// load the function.</span>
+    <span class="n">load</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;functions.lua&quot;</span><span class="p">);</span>
+    <span class="c1">// load the Unit Wrapper.</span>
+    <span class="n">loadWrapper</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+
+    <span class="n">ApplyDamageFunction</span> <span class="n">damageFunction</span><span class="p">(</span><span class="s">&quot;applyDamage&quot;</span><span class="p">);</span>
+
+    <span class="n">Unit</span> <span class="n">unit1</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+    <span class="n">Unit</span> <span class="n">unit2</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">40</span><span class="p">);</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Health of unit1 and unit2 before unit1 deals damage to unit2 : [Unit1 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit1</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;] [Unit2 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit2</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">damageFunction</span><span class="p">.</span><span class="n">applyDamage</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">unit1</span><span class="p">,</span> <span class="n">unit2</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Health of unit1 and unit2 after unit1 deals damage to unit2 : [Unit1 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit1</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;] [Unit2 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit2</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="n">damageFunction</span><span class="p">.</span><span class="n">applyDamage</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">unit2</span><span class="p">,</span> <span class="n">unit1</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Health of unit1 and unit2 after unit2 deals damage to unit1 : [Unit1 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit1</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;] [Unit2 : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">unit2</span><span class="p">.</span><span class="n">health</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+    <span class="n">cleanup</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>I kind of rushed through this part of the tutorial.
+If there is any part that is unclear, email me and I will try to write it better.
+The code for this part of the tutorial can be found <a href="https://github.com/ZwodahS/lua-examples/tree/master/tutorial/5">here</a>, in the file basic.cpp.</p>
+
+<p>Next I will briefly cover how to do inheritance in Lua by extending the example above.</p>
+
+<p>Suppose now we want to add a new child class to Unit; Hero. 
+This class have an additional attribute “name”.
+It will look something like this in C++.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Hero</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Unit</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">Hero</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">n</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">Unit</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">name</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="p">{</span>
+    <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">int</span> <span class="nf">getDamage</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Unit</span><span class="o">::</span><span class="n">getDamage</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<p>And the method for the getName function for lua </p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">static</span> <span class="kt">int</span> <span class="nf">function_hero_name</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">args</span> <span class="o">=</span> <span class="n">lua_gettop</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Hero</span><span class="o">**</span> <span class="n">hero</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Hero</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">luaL_testudata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;HeroMT&quot;</span><span class="p">));</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">hero</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">lua_pushstring</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="p">(</span><span class="o">**</span><span class="n">hero</span><span class="p">).</span><span class="n">name</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+            <span class="n">lua_pushnil</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="n">lua_pushnil</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>So what are the things that we need to change. 
+Let us start by creating the metatable for Hero.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">luaL_newmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;HeroMT&quot;</span><span class="p">);</span>
+    <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;__index&quot;</span><span class="p">);</span>
+
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function_hero_name</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;getName&quot;</span><span class="p">);</span>
+
+    <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
+
+<p>In order for the method in UnitMT to be accessible for HeroMT, we need to set the metatable of HeroMT to UnitMT.
+So the full code for loading the HeroMT table will look like this</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">luaL_newmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;HeroMT&quot;</span><span class="p">);</span>
+    <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;__index&quot;</span><span class="p">);</span>
+
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">function_hero_name</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;getName&quot;</span><span class="p">);</span>
+    <span class="cm">/**</span>
+<span class="cm">     * Set the parent of Hero to Unit</span>
+<span class="cm">     */</span>
+    <span class="n">luaL_setmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">);</span>
+
+    <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
+
+<p>This seems enough to do the trick but we still got one more thing to do.
+If we call the method in UnitMT using a object with metatable “HeroMT”, the following method will return a nullptr</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">Unit</span><span class="o">**</span> <span class="n">unit</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Unit</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">luaL_testudata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">));</span></code></pre></div>
+
+<p>So for methods that are uses this, we will have to replace it with</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">Unit</span><span class="o">*</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">getUnit</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
+
+<p>And the getUnit method looks something like this</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">Unit</span><span class="o">*</span> <span class="nf">getUnit</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">index</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Unit</span><span class="o">**</span> <span class="n">userdata</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Unit</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">luaL_testudata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="s">&quot;UnitMT&quot;</span><span class="p">));</span>
+    <span class="n">Hero</span><span class="o">**</span> <span class="n">herodata</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Hero</span><span class="o">**&gt;</span><span class="p">(</span><span class="n">luaL_testudata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="s">&quot;HeroMT&quot;</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">userdata</span> <span class="o">?</span> <span class="o">*</span><span class="nl">userdata</span> <span class="p">:</span> <span class="n">herodata</span> <span class="o">?</span> <span class="o">*</span><span class="nl">herodata</span> <span class="p">:</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>If you have more classes that extends Unit, then you would have to change this to cater to them.
+For now this will do.
+The full code can be found in the same folder, inside a different cpp file : inheritance.cpp.
+I guess that is it for now.</p>
+
+<p><a href="/tutorial/lua/3">[« Running a C++ function from Lua]</a> <a href="/tutorial/lua">[Tutorial Index]</a> <a href="/tutorial/lua/6">[Package a function in Lua »]</a></p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+    
+
+    <footer class="motd-div">
+</footer>
+<footer class="site-footer">
+    <div class="wrapper">
+        <span class="last-updated-date">Last updated at 08 November 2014</span>
+    </div>
+</footer>
+
+
+  </body>
+
+</html>
