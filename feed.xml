@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>ZwodahS</title>
+    <title>ZwodahS|me</title>
     <description></description>
     <link>http://zwodahs.me/</link>
     <atom:link href="http://zwodahs.me/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 08 Nov 2014 02:39:40 +0800</pubDate>
-    <lastBuildDate>Sat, 08 Nov 2014 02:39:40 +0800</lastBuildDate>
+    <pubDate>Fri, 02 Jan 2015 02:26:04 +0800</pubDate>
+    <lastBuildDate>Fri, 02 Jan 2015 02:26:04 +0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
   </channel>

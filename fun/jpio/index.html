@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Object-oriented in Lua</title>
+    <title>JPIO</title>
     <meta name="description" content="">
 
     <link rel="stylesheet" href="/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
-    <link rel="canonical" href="http://zwodahs.me/tutorial/lua/4/">
+    <link rel="canonical" href="http://zwodahs.me/fun/jpio/">
 </head>
 
 
@@ -54,14 +54,33 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Object-oriented in Lua</h1>
+    <h1 class="post-title">JPIO</h1>
   </header>
 
   <article class="post-content">
-    <p>Coming soon….</p>
+    <h3 id="what-is-it">What is it</h3>
+<p>Json Python IO is a command line utility to read/write json data.
+It started because I want to be able to use json files as configuration files via the command line.</p>
 
-<p><strong>Note: I probably will not be able to write this part, as I didn’t use Lua to create objects.
-If anyone have experience doing this, I can link to you =). Just let me know</strong></p>
+<h3 id="existing-implementations">Existing implementations</h3>
+<p>I found a few existing implementation that are good, like <a href="http://stedolan.github.io/jq/">‘json’</a> (written in node), and <a href="https://github.com/jingweno/jqplay">jq</a>.
+However, I wanted a implementation I can modify and add new stuffs to.
+So as usual, I decided to tackle the problem.</p>
+
+<h3 id="logs">Logs</h3>
+
+<h4 id="jan-02">2015 Jan 02</h4>
+<p>I have manage to hack up an quick version to test if i am capable of doing something like that.
+The existing version can be found at <a href="https://github.com/ZwodahS/jpio">github</a>.</p>
+
+<p>However, there are a lot of things that I wanted to be in the program that requires a complete rewrite of the parser and runtime.
+So instead of implementing it straight away, the documentation <a href="/fun/jpio/query-doc/">here</a> will describe all the query that I want to be in jpio.</p>
+
+<h3 id="current-thoughts">Current thoughts</h3>
+<p>The scope of the projects exploded and I am not sure if I can finish it =).
+The code on github is usable but does less than what jq does.
+I am still looking into how to parse and how the runtime will be implemented.</p>
+
 
   </article>
 
