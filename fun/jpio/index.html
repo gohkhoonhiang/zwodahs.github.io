@@ -60,7 +60,9 @@
   <article class="post-content">
     <h3 id="what-is-it">What is it</h3>
 <p>Json Python IO is a command line utility to read/write json data.
-It started because I want to be able to use json files as configuration files via the command line.</p>
+It started out as a simple idea to read and write json files via command line.
+As I started working on it, I soon wonder how much I can pushed it.
+It has now become a query/transformation language for json.</p>
 
 <h3 id="existing-implementations">Existing implementations</h3>
 <p>I found a few existing implementation that are good, like <a href="http://stedolan.github.io/jq/">‘json’</a> (written in node), and <a href="https://github.com/jingweno/jqplay">jq</a>.
@@ -68,6 +70,15 @@ However, I wanted a implementation I can modify and add new stuffs to.
 So as usual, I decided to tackle the problem.</p>
 
 <h3 id="logs">Logs</h3>
+
+<h4 id="jan-11-17">2015 Jan 11-17</h4>
+<p>Drafted a language spec. It can be found <a href="/fun/jpio/query-spec/">here</a>.
+In the same spec, I will also write what are the expected output.
+With this out of the way, I think I will begin implementing it.</p>
+
+<h4 id="jan-05">2015 Jan 05</h4>
+<p>Been thinking about how and what the feature of JPIO should be and how much it should do.
+Rewrite the parser and runtime about 3 times, each time was forced to rewrite again due to feature creep.</p>
 
 <h4 id="jan-02">2015 Jan 02</h4>
 <p>I have manage to hack up an quick version to test if i am capable of doing something like that.
