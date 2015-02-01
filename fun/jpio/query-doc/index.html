@@ -90,10 +90,10 @@ For example, <code>.books.[*]</code> should return <code>[ &lt;book&gt;, &lt;boo
 In additional to that, you should be able to create a list of books name simply by <code>.books.[*].name</code>, which will then return [name, name, name, …]</p>
 
 <p>Partial list can also be returned.
-For example <code>.books[0:10]</code> will return you the first 10 books, or just <code>.books[:10]</code>.</p>
+For example <code>.books.[0:10]</code> will return you the first 10 books, or just <code>.books.[:10]</code>.</p>
 
 <p>Single item selection uses a similar syntax.
-<code>.books[0]</code> will return the first book in the list.
+<code>.books.[0]</code> will return the first book in the list.
 <code>.books.0</code> should also returns the same result.</p>
 
 <h3 id="modifications">Modifications</h3>

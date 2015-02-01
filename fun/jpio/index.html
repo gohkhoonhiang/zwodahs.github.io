@@ -58,39 +58,32 @@
   </header>
 
   <article class="post-content">
-    <h3 id="what-is-it">What is it</h3>
-<p>Json Python IO is a command line utility to read/write json data.
-It started out as a simple idea to read and write json files via command line.
-As I started working on it, I soon wonder how much I can pushed it.
-It has now become a query/transformation language for json.</p>
+    <h3 id="what-is-jpio">What is JPIO</h3>
+<p>Json Python IO(JPIO) is a command line utility to read/transform json data in commandline.</p>
 
 <h3 id="existing-implementations">Existing implementations</h3>
-<p>I found a few existing implementation that are good, like <a href="http://stedolan.github.io/jq/">‘json’</a> (written in node), and <a href="https://github.com/jingweno/jqplay">jq</a>.
-However, I wanted a implementation I can modify and add new stuffs to.
-So as usual, I decided to tackle the problem.</p>
+<p>There are a few existing implementation that are good, like <a href="http://stedolan.github.io/jq/">‘json’</a> (written in node), and <a href="https://github.com/jingweno/jqplay">jq</a>.</p>
 
-<h3 id="logs">Logs</h3>
+<h3 id="reason-for-jpio">Reason for JPIO</h3>
+<p>Although there are existing implementations, I feel that the syntax can be nicer.
+Also, I feel that it has been a while since I did something like this, so I decided to make one myself.</p>
 
-<h4 id="jan-11-17">2015 Jan 11-17</h4>
-<p>Drafted a language spec. It can be found <a href="/fun/jpio/query-spec/">here</a>.
-In the same spec, I will also write what are the expected output.
-With this out of the way, I think I will begin implementing it.</p>
+<p>I decided to use python mainly because of how easily json is mapped into python’s list and dict.</p>
 
-<h4 id="jan-05">2015 Jan 05</h4>
-<p>Been thinking about how and what the feature of JPIO should be and how much it should do.
-Rewrite the parser and runtime about 3 times, each time was forced to rewrite again due to feature creep.</p>
+<h3 id="jpio-and-jstql">JPIO and JsTQL</h3>
+<p>There are 2 part to the project.
+The first part is JsTQL, or Json Transformation and Query Language.
+This is a simple language that can be used to query or transform json data.
+JsTQL comes with a parser and a runtime, which can be imported from any python project.</p>
 
-<h4 id="jan-02">2015 Jan 02</h4>
-<p>I have manage to hack up an quick version to test if i am capable of doing something like that.
-The existing version can be found at <a href="https://github.com/ZwodahS/jpio">github</a>.</p>
+<p>The second part is JPIO, a commandline wrapper around JsTQL.
+This is a simple wrapper to parse json using the json module in python.
+This is built separately from jstql.</p>
 
-<p>However, there are a lot of things that I wanted to be in the program that requires a complete rewrite of the parser and runtime.
-So instead of implementing it straight away, the documentation <a href="/fun/jpio/query-doc/">here</a> will describe all the query that I want to be in jpio.</p>
+<h3 id="links">links</h3>
 
-<h3 id="current-thoughts">Current thoughts</h3>
-<p>The scope of the projects exploded and I am not sure if I can finish it =).
-The code on github is usable but does less than what jq does.
-I am still looking into how to parse and how the runtime will be implemented.</p>
+<p>The source of JPIO can be found at <a href="https://github.com/ZwodahS/jpio">github</a>.
+There is no dependencies for running jpio.</p>
 
 
   </article>
