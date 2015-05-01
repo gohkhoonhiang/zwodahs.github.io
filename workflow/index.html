@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>My Workflow</title>
+    <meta name="description" content="">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <link rel="canonical" href="http://zwodahs.me/workflow/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+    <div class="wrapper">
+        <a class="site-title" href="/">ZwodahS|me</a>
+    </div>
+</header>
+<nav class="site-nav">
+    <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+    </a>
+    <div class="wrapper">
+        <div class="trigger">
+        
+            <a class="page-link" href="/fun">Fun Projects</a>
+        
+            <a class="page-link" href="/projects/games/">Games I made</a>
+        
+            <a class="page-link" href="/lessons/">Tutorials and Lessons</a>
+        
+            <a class="page-link" href="/life/">My Lifes</a>
+        
+            <a class="page-link" href="/about/">About</a>
+        
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">My Workflow</h1>
+  </header>
+
+  <article class="post-content">
+    <h1 id="background">Background</h1>
+<p>I love sharing my workflow with people around me and I thought why not take it to a next level and just share it online.
+I believe that what I am going to share will be beneficial to anyone who wants to try out similar workflow.</p>
+
+<p>I have been working on the terminal since 2012, started with vim as my editor and some basic cli-tools.
+I build my vimrc from scratch and have did a few rounds of refactoring on the way.
+Tmux was added to the workflow in late 2014 and it greatly improved my productivity.</p>
+
+<p>I believe that as programmers, we should constantly be improving our tools and also seek out new tools to improve our workflow.</p>
+
+<h1 id="list-of-tools">List of tools</h1>
+
+<p>My current list of tools that I use on a daily basis are</p>
+
+<ol>
+  <li>Bash - My choice of shell.</li>
+  <li>Tmux - Terminal Multiplexer. Highly customizable.</li>
+  <li>Vim - Super Editor.</li>
+</ol>
+
+<h2 id="bash">Bash</h2>
+
+<p>Bash is the choice of shell mainly because it was the one that I encountered first.
+When I first saw terminal, it was way back when I started programming and I couldn’t understand why anyone would switch from GUI to commandline.
+After working on the terminal, I can’t understand why anyone would move back.</p>
+
+<p>I also stop using finder to navigate my filesystem.
+Using terminal allows me to get to somewhere faster or to find a specific file easier.
+If I need to drag the file somewhere, I can simply open it with -R option.</p>
+
+<h3 id="how-">How ?</h3>
+<p>The easiest way to start using bash is to replace your daily workflow of finder with the basic commands like <code>cd, ls, cat</code> etc.
+This will get you used to the commandline without requiring you to do too much.
+After a while, you also should start thinking about making your bash looks nice and useful.</p>
+
+<h4 id="start-with-a-simple-bashprofile">1. Start with a simple <code>bash_profile</code></h4>
+<p>Start with a mindset that you hate typing.
+Create alias basic stuffs like <code>ls -l</code> to <code>ll</code> or aliasing it to even just <code>l</code>.</p>
+
+<h4 id="learn-all-the-shortcuts">2. Learn all the shortcuts.</h4>
+<p>There are a few good shortcuts to learn.
+I am still trying to get some of them into muscle memory.</p>
+
+<ol>
+  <li>Ctrl-f Ctrl-b : forward one char and backward one char.
+Why this when we can just use the arrow keys ?
+Arrow keys are kind of bad; It is less bad if you are using mac keyboard, but still not an excuse for you to use it</li>
+  <li>Ctrl-p Ctrl-n : previous command and next command.
+Similar to just up arrow and down. See a pattern here?</li>
+  <li>Ctrl-a Ctrl-e : go to start of line, go to end of line
+This is one that I haven’t got used to.</li>
+  <li>Ctrl-r Ctrl-s : reverse/forward search for history</li>
+  <li>Ctrl-w : delete word
+There are many more similar ones which I haven’t got into my muscle memory, like Ctrl-K for example.</li>
+</ol>
+
+<p>While you are at it, change your capslock to ctrl. You don’t need the caplocks.</p>
+
+<h4 id="learn-bash-scripting">3. Learn bash scripting.</h4>
+<p>If you need to do something, try to do it in bash, using all the other commandline tools like cat, grep etc.
+Some automation in your terminal can really go a long way.</p>
+
+<h4 id="share-and-learn">4. Share and learn</h4>
+<p>Share your dotfiles to the world (excluding all the sensitive information) and read other people dotfiles to learn new tricks.
+You can find mine <a href="https://github.com/ZwodahS/dotfiles">here</a>.</p>
+
+<h2 id="tmux">Tmux</h2>
+<p>Before I picked up tmux, I was already using vim for my C++ development.
+However, because I didn’t had tmux, I ended up having tons of terminal tabs on my iTerm.</p>
+
+<h3 id="what-is-tmux">What is Tmux</h3>
+<p>Tmux is a terminal multiplexer.
+It allows you to have tabs and splits in a single session.
+Why is this useful when you can just open multiple tabs/splits in iTerm/Terminal ?</p>
+
+<p>Well, for one, if you are working on remote, it is really useful since you only need to ssh to the server once.
+On top of that, it allows you to copy text from one tab/window to another, without ever lifting your finger to use the mouse/trackpad.
+I really hate using trackpad.</p>
+
+<p>The most important reason why tmux is useful, is that the splits and tabs are kept alive, even if you disconnect from the remote.
+I can’t emphasize how important this is, not just to ease the pain when you disconnect from the server due to the network failure, but also to allow you to work from different machines seamlessly.</p>
+
+<h3 id="how--1">How ?</h3>
+<p>So how to get started in tmux ?
+I would recommend the following steps.</p>
+
+<h4 id="choose-a-binding">1. Choose a binding.</h4>
+<p>The default key for tmux is Ctrl-B, but I use Ctrl-Q because it is easier to press.
+You don’t have to choose the same, just pick one, but preferbly one that you can reach easily, as you will be using it a lot.</p>
+
+<h4 id="unbind-all-commands">2. Unbind all commands</h4>
+<p>This can be achieved by putting <code>unbind-key -a</code> in .tmux.conf in your home directory.
+Why should you unbind all commands ?
+This allow you to build the configuration slowly from scratch and only keep what you need.
+However, there are few of them that are important and need to be binded first.</p>
+
+<ol>
+  <li>detach - allow you to exit tmux without closing all the tabs</li>
+  <li>kill-window - kill the window that you are in.</li>
+</ol>
+
+<p>That is all you need to ensure that you don’t get stuck in your tmux.</p>
+
+<h4 id="bind-commands-that-are-useful-to-you">3. Bind commands that are useful to you.</h4>
+<p>To look at the full list of commands, you can use <code>tmux list-commands</code>.
+From there, you can see all the available commands in tmux.
+If you are unsure how to bind, look at my <a href="https://github.com/ZwodahS/dotfiles/blob/master/tmuxconf">.tmux-conf</a> and see how it is done.</p>
+
+<p>The first few commands that might be useful are window splitting, new tabs and window resizing.</p>
+
+<h4 id="share-your-tmuxconf-and-learn-from-others">4. Share your .tmux.conf and learn from others.</h4>
+<p>When you are done configuring, it is a good idea to commit to a dotfile folder on github and let other people look and learn from it.
+You should also look at other conf file to see ideas that you can use.</p>
+
+<h3 id="tips">Tips</h3>
+<p>One tip that might be useful when starting off is to have a binding that reload tmux conf, so you don’t have to restart tmux everytime you change something.
+It can be achieved by binding a key to  <code>source-file ~/.tmux.conf</code></p>
+
+<h2 id="vim">Vim</h2>
+
+<h3 id="what-is-vim">What is Vim</h3>
+<p>Vim is a highly customizable editor that is available on the command line.
+If you are working on OSX or Linux, then it should already be available in your terminal.</p>
+
+<h3 id="why-vim">Why Vim</h3>
+<p>Different people have different reasons why they switch to vim or choose vim in the first place.
+Some people grow up with it, and didn’t have to make the switch, others tried IDEs and various editors and realized that vim is the one.
+I belong to the latter.</p>
+
+<p>So why do I continue to use vim even though many other “better” editors/IDE exists ?
+Here are my reasons.</p>
+
+<h4 id="no-distraction">No Distraction</h4>
+<p>Vim has a clean UI.
+When you run it, you only see your code any nothing else.
+Most of the other editor feels your screen with unncessary windows that leaves only a small part of the screen for your code.</p>
+
+<h4 id="modal-editing">Modal Editing</h4>
+<p>This is one of the things that once you get used to, you will never leave.
+In vim, you have 3 modes; Visual, Normal and Insert.
+In general,</p>
+
+<ul>
+  <li>Visual - Selecting stuffs</li>
+  <li>Normal - Moving around or applying commands</li>
+  <li>Insert - Adding texts.</li>
+</ul>
+
+<p>The separation of modes allow you to think what you are trying to do and also allows for more specific key bindings for various modes, which brings me to next point</p>
+
+<h4 id="key-bindings">Key bindings</h4>
+<p>Normal IDEs requires tons of key bindings in the form of ctrl+alt+shift.
+Who use them ? seriously.. who ?
+Those are so HARD to use.</p>
+
+<p>In Vim, you can use sequence of keystroke instead of combination.
+Pressing 2 keys one after another is definitely better than trying to press Ctrl-Shift ??.</p>
+
+<p>On top of that, we have keybindings for everything.
+Visually select everything in “”, we have that - <code>va"</code> (inclusive of “) or <code>vi"</code>(exclusive of “), or if you just want to copy to clipboard, <code>ya"</code> and <code>yi"</code> will work.</p>
+
+<p>Some vim users also like to change their caplocks to esc.
+This is because esc is the primary way to change the mode back to normal mode.
+However, I choose to bind my caplocks to ctrl instead.
+This is because I also use bash a lot and having Ctrl+? available is really handy.
+Instead of using esc, I am using Ctrl+[ to escape.
+It seems hard at first but I got used to it within 2 weeks.</p>
+
+<h4 id="no-mousetrackpad">No Mouse/Trackpad</h4>
+<p>Having to move to mouse or trackpad to do something sucks.
+When using vim, my hand is always on the keyboard.
+This means that there is little to no break of flow when I am programming.</p>
+
+<h3 id="plugins">Plugins</h3>
+<p>Having said all the reasons why I choose vim, the default vim isn’t enough.
+You will need to tweak it to make it your own and become one with it :D.</p>
+
+<p>Sharing my configuration doesn’t make sense, because everyone have a different way of doing things.
+Instead, you can look at my vimfiles at <a href="https://github.com/ZwodahS/vimfiles">github</a>.
+They are heavily commented with the intention for people to learn from it.
+I will also showcase the list of plugins that I feel are the most important in the list I am using.</p>
+
+<h4 id="fuzzy-file-finder---ctrlp">Fuzzy File Finder - CtrlP</h4>
+<p>There are many plugins for this, but my choice is <a href="http://vimawesome.com/plugin/ctrlp-vim-state-of-grace">CtrlP</a>.
+It is the first that I encountered, and there is no need to replace it at the moment.
+Without this, opening a file involve manually typing the exact filename or using a file navigator.
+This is a MUST have.</p>
+
+<h4 id="filesfolder-navigation">Files/Folder Navigation</h4>
+<p><a href="http://vimawesome.com/plugin/the-nerd-tree">Nerdtree</a> is my choice for this.
+Some people choose to use the builtin in vim but I think this provide a better view.
+I don’t use this as much now, after I started using CtrlP.
+I also started using Tmux + Bash to browse my files, so it might be time for NerdTree to go.
+Nevertheless, worth a mention.</p>
+
+<h4 id="undo-tree">Undo Tree</h4>
+<p>Ever undo so much that sometimes you wish you can go back to what you had undo ?
+Well, <a href="http://vimawesome.com/plugin/gundo">Gundo</a> to the rescue.
+To be honest, you don’t need this plugin to find the edit that you want, you will just need to read the help file provided by vim.
+Gundo just provides a easy way to visualize your undo tree and find the edit you want.</p>
+
+<h4 id="snippets">Snippets</h4>
+<p>Snippets is something that I only started using recently.
+I can’t say much about it yet as I am still trying to get it into my muscle memory.
+I used to use <a href="http://vimawesome.com/plugin/vim-snippets">vim-snippets</a> but recently changed to <a href="http://vimawesome.com/plugin/ultisnips-forever-and-always">UltiSnips</a>.
+This main reason for the change is to allow it to work with my autocomplete engine.</p>
+
+<h4 id="autocomplete">AutoComplete</h4>
+<p>Vim default autocomplete was good enough for me for at least 2 years, before I found <a href="http://vimawesome.com/plugin/youcompleteme">YouCompleteMe</a>.
+It also works well with my snippets plugins, so that is a double win.</p>
+
+<h4 id="motion">Motion</h4>
+<p>This is the last in the list, but will confuse anyone who don’t use vim and are new to vim.
+I will not go into details but <a href="http://vimawesome.com/plugin/easymotion">easymotion</a> will be really useful once you get used to vim’s basic motion keys.</p>
+
+<h3 id="learning-vim">Learning Vim</h3>
+<p>Many people have given their advices on how to learn vim.
+I will also give mine as well.</p>
+
+<ol>
+  <li>Decide that you want to improve.</li>
+  <li>Start small, if you haven’t try vim before use <code>vimtutor</code>.</li>
+  <li>Don’t use the mouse, even if that makes you faster (in the short term).</li>
+  <li>Don’t use the arrow key, ever (almost).</li>
+  <li>Start with a minimum set of bindings, don’t download pre-bundled vim. There is too much there.</li>
+  <li>Build your muscle memory. After a while, you stop thinking about how to do certain things and do it automatically.</li>
+  <li>Steal vimrc. Learn from other people. Find new plugins.</li>
+  <li>Keep learning and upgrading your vimrc.</li>
+  <li>Share your vimfiles.</li>
+</ol>
+
+<h1 id="summary">Summary</h1>
+<p>Before I end, here is a <a href="https://www.youtube.com/watch?v=5r6yzFEXajQ">video</a> of Tmux+Vim by someone else, who is quite similar to mine.</p>
+
+<p>I will continue to update this post with more stuffs when I upgrade my workflow.
+Happy hacking :D</p>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+    
+
+    <footer class="motd-div">
+</footer>
+<footer class="site-footer">
+    <div class="wrapper">
+        <span class="last-updated-date">Last updated at 02 May 2015</span>
+    </div>
+</footer>
+
+
+  </body>
+
+</html>
